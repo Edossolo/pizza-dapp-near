@@ -106,6 +106,27 @@ impl PizzaPap {
         // update storage
         self.user_orders.insert(&user, &user_orders);
     }
+
+    pub fn edit_order(&mut self, order_id: &String, order_location: &String, order_phone_number: &String){
+        // get caller accountId
+        let user: AccountId = env::predecessor_account_id();
+
+        // check if user already has an order mapping, declare error if not
+        let mut user_orders = match self.user_orders.get(&user) {
+            Some(x) => x,
+            None => env::panic_str("Invalid user records"),
+        };
+
+         // check for order with id, return error if order does not exist
+         let mut order = match user_orders.get(order_id) {
+            Some(x) => x,
+            None => env::panic_str("Orders not found"),
+        };
+
+    // update order status
+        order.edit_payload(&order_id, &order_location);
+
+    }
 }
 
 #[near_bindgen]
@@ -156,5 +177,12 @@ impl Order {
 
     pub fn update_order_status(&mut self) {
         self.status = true;
+    }
+
+    pub fn edit_payload(location: &String, phone_number: &String) -> Self{
+        Self{
+            location: location,
+            phone_number: phone_number,  
+        }
     }
 }
